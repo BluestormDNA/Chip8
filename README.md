@@ -10,7 +10,7 @@ A swing window to see something (doh!)
 CPU stack, stackpointer, registers and a handful of cpu opcodes for fetch decode and execution:
 00EE, 1NNN, 2nnn, 3XNN, 6xkk, 7XNN, Annn, and that damn Dxyn
 
-At the moment some games boot and draw to screen.
+At the moment some games boot and draw to screen (like Pong2)
 
- ![Pong](https://user-images.githubusercontent.com/28767885/46166952-c58b7700-c294-11e8-99c5-374c34168b1e.png)
-(Pong booting and drawing to screen.)
+![Pong2](https://user-images.githubusercontent.com/28767885/46166952-c58b7700-c294-11e8-99c5-374c34168b1e.png)
+
