@@ -48,8 +48,7 @@ public class Cpu {
                 pc = opcode & 0x0FFF;
                 break;
             case 0x2000:
-                //2nnn - CALL
-                //Calls address NNN
+                //2NNN 	Flow 	*(0xNNN)() 	Calls subroutine at NNN. 
                 stack[stackPointer++] = pc;
                 pc = opcode & 0x0FFF;
                 break;
@@ -75,9 +74,7 @@ public class Cpu {
                 pc += 2;
                 break;
             case 0x6000:
-                //6xkk - LD Vx, byte
-                //Set Vx = kk.
-                //The interpreter puts the value kk into register Vx.
+                //6XNN 	Const 	Vx = NN 	Sets VX to NN. 
                 V[(opcode & 0x0F00) >> 8] = opcode & 0x00FF;
                 pc += 2;
                 break;
@@ -97,26 +94,20 @@ public class Cpu {
                 pc += 2;
                 break;
             case 0xA000:
-                //Annn - LD I, addr
-                //Set I = nnn.
-                //The value of register I is set to nnn.
+                //ANNN 	MEM 	I = NNN 	Sets I to the address NNN. 
                 I = opcode & 0x0FFF;
                 pc += 2;
                 break;
             case 0xB000:
-                warnUnsupportedOpcode();
+                //BNNN 	Flow 	PC=V0+NNN 	Jumps to the address NNN plus V0. 
+                
                 break;
             case 0xC000:
+                //CXNN 	Rand 	Vx=rand()&NN 	Sets VX to the result of a bitwise and operation on a random number (Typically: 0 to 255) and NN. 
                 warnUnsupportedOpcode();
                 break;
             case 0xD000:
-                /* Dxyn - DRW Vx, Vy, nibble
-                Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision.
-                The interpreter reads n bytes from memory, starting at the address stored in I.
-                These bytes are then displayed as sprites on screen at coordinates (Vx, Vy).
-                Sprites are XORed onto the existing screen. If this causes any pixels to be erased,
-                VF is set to 1, otherwise it is set to 0. If the sprite is positioned so part of it
-                is outside the coordinates of the display, it wraps around to the opposite side of the screen.*/
+                //DXYN 	Disp 	draw(Vx,Vy,N) 	Draws a sprite at coordinate (VX, VY) that has a width of 8 pixels and a height of N pixels. Each row of 8 pixels is read as bit-coded starting from memory location I; I value doesn’t change after the execution of this instruction. As described above, VF is set to 1 if any screen pixels are flipped from set to unset when the sprite is drawn, and to 0 if that doesn’t happen 
                 int x = V[(opcode & 0x0F00) >> 8];
                 int y = V[(opcode & 0x00F0) >> 4];
                 int n = opcode & 0x000F;
