@@ -5,6 +5,8 @@
  */
 package chip8.interpreter;
 
+import java.util.Arrays;
+
 /**
  *
  * @author BlueStorm
@@ -39,17 +41,7 @@ public class Cpu {
     public void decodeAndExecute() {
         switch (opcode & 0xF000) {
             case 0x0000:
-                switch (opcode) {
-                    case 0x00EE:
-                        /* 00EE - RET Return from a subroutine.
-                        The interpreter sets the program counter to the address at the top
-                        of the stack, then subtracts 1 from the stack pointer. */
-                        stackPointer--;
-                        pc = stack[stackPointer] + 2; //that damn 2 where it says on doc that it consumes !!!
-                        break;
-                    default:
-                        warnUnsupportedOpcode();
-                }
+                decodeAndExecute0x0000();
                 break;
             case 0x1000:
                 //1NNN 	Flow 	goto NNN; 	Jumps to address NNN.
@@ -58,21 +50,22 @@ public class Cpu {
             case 0x2000:
                 //2nnn - CALL
                 //Calls address NNN
-                stack[stackPointer] = pc;
-                stackPointer++;
+                stack[stackPointer++] = pc;
                 pc = opcode & 0x0FFF;
                 break;
             case 0x3000:
-                //3XNN 	Cond 	if(Vx==NN) 	Skips the next instruction if VX equals NN. (Usually the next instruction is a jump to skip a code block) 
+                //3XNN 	Cond 	if(Vx==NN) 	Skips the next instruction if VX equals NN.
                 if (V[(opcode & 0x0F00) >> 8] == (opcode & 0x00FF)) {
                     pc += 2;
                 }
                 pc += 2;
                 break;
             case 0x4000:
+                //4XNN 	Cond 	if(Vx!=NN) 	Skips the next instruction if VX doesn't equal NN. (Usually the next instruction is a jump to skip a code block) 
                 warnUnsupportedOpcode();
                 break;
             case 0x5000:
+                //5XY0 	Cond 	if(Vx==Vy) 	Skips the next instruction if VX equals VY.
                 warnUnsupportedOpcode();
                 break;
             case 0x6000:
@@ -88,7 +81,7 @@ public class Cpu {
                 pc += 2;
                 break;
             case 0x8000:
-                warnUnsupportedOpcode();
+                decodeAndExecute0x8000();
                 break;
             case 0x9000:
                 warnUnsupportedOpcode();
@@ -148,15 +141,48 @@ public class Cpu {
                 break;
 
             case 0xF000:
-                switch (opcode & 0xF0FF) {
-                    case 0xF033:
-                        warnUnsupportedOpcode();
-                        break;
-                    default:
-                        warnUnsupportedOpcode();
-                }
+                decodeAndExecute0xF000();
+
                 break;
 
+            default:
+                warnUnsupportedOpcode();
+        }
+    }
+
+    private void decodeAndExecute0x0000() {
+        System.out.println(Integer.toHexString(opcode));
+        switch (opcode & 0xF0FF) {
+            case 0x000E:
+                //00E0 	Display 	disp_clear() 	Clears the screen. 
+                Arrays.fill(gfx, 0);
+                pc += 2;
+                break;
+            case 0x00EE:
+                //00EE 	Flow 	return; 	Returns from a subroutine. 
+                pc = stack[--stackPointer];
+                pc += 2;
+                break;
+            default: //0nnn omited This instruction is only used on the old computers on which Chip-8 was originally implemented. It is ignored by modern interpreters.
+                warnUnsupportedOpcode();
+        }
+    }
+
+    private void decodeAndExecute0x8000() {
+        switch (opcode & 0xF0FF) {
+            case 0xF033:
+                warnUnsupportedOpcode();
+                break;
+            default:
+                warnUnsupportedOpcode();
+        }
+    }
+
+    private void decodeAndExecute0xF000() {
+        switch (opcode & 0xF0FF) {
+            case 0xF033:
+                warnUnsupportedOpcode();
+                break;
             default:
                 warnUnsupportedOpcode();
         }
