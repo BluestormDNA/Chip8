@@ -100,11 +100,11 @@ public class Cpu {
                 break;
             case 0xB000:
                 //BNNN 	Flow 	PC=V0+NNN 	Jumps to the address NNN plus V0. 
-                
+                pc =  V[0] + (opcode & 0x0FFF);
                 break;
             case 0xC000:
                 //CXNN 	Rand 	Vx=rand()&NN 	Sets VX to the result of a bitwise and operation on a random number (Typically: 0 to 255) and NN. 
-                warnUnsupportedOpcode();
+                V[(opcode & 0x0F00) >> 8] = (int) (Math.random() * 255) & (opcode & 0x00FF);
                 break;
             case 0xD000:
                 //DXYN 	Disp 	draw(Vx,Vy,N) 	Draws a sprite at coordinate (VX, VY) that has a width of 8 pixels and a height of N pixels. Each row of 8 pixels is read as bit-coded starting from memory location I; I value doesn’t change after the execution of this instruction. As described above, VF is set to 1 if any screen pixels are flipped from set to unset when the sprite is drawn, and to 0 if that doesn’t happen 
