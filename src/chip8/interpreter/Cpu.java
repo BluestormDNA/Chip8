@@ -90,7 +90,11 @@ public class Cpu {
                 decodeAndExecute0x8000();
                 break;
             case 0x9000:
-                warnUnsupportedOpcode();
+                //9XY0 	Cond 	if(Vx!=Vy) 	Skips the next instruction if VX doesn't equal VY.
+                if (V[(opcode & 0x0F00) >> 8] != V[(opcode & 0x00F0) >> 4]) {
+                    pc += 2;
+                }
+                pc += 2;
                 break;
             case 0xA000:
                 //Annn - LD I, addr
