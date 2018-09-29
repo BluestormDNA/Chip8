@@ -155,9 +155,8 @@ public class Cpu {
     }
 
     private void decodeAndExecute0x0() {
-        System.out.println(Integer.toHexString(opcode));
         switch (opcode & 0xF0FF) {
-            case 0x000E:
+            case 0x00E0:
                 //00E0 	Display 	disp_clear() 	Clears the screen. 
                 Arrays.fill(gfx, 0);
                 pc += 2;
@@ -173,44 +172,44 @@ public class Cpu {
     }
 
     private void decodeAndExecute0x8() {
-        switch (opcode & 0xF0FF) {
-            case 0x8FF0:
+        switch (opcode & 0xF00F) {
+            case 0x8000:
                 //8XY0 	Assign 	Vx=Vy 	Sets VX to the value of VY. 
                 V[x()] = V[y()];
                 break;
-            case 0x8FF1:
+            case 0x8001:
                 //8XY1 	BitOp 	Vx=Vx|Vy 	Sets VX to VX or VY. (Bitwise OR operation) 
                 V[x()] |= V[y()];
                 break;
-            case 0x8FF2:
+            case 0x8002:
                 //8XY2 	BitOp 	Vx=Vx&Vy 	Sets VX to VX and VY. (Bitwise AND operation) 
                 V[x()] &= V[y()];
                 break;
-            case 0x8FF3:
+            case 0x8003:
                 //8XY3 	BitOp 	Vx=Vx^Vy 	Sets VX to VX xor VY. 
                 V[x()] ^= V[y()];
                 break;
-            case 0x8FF4:
+            case 0x8004:
                 //8XY4 	Math 	Vx += Vy 	Adds VY to VX. VF is set to 1 when there's a carry, and to 0 when there isn't. 
                 //TODO IMPLEMENT CARRY !!!
                 V[x()] += V[y()];
                 break;
-            case 0x8FF5:
+            case 0x8005:
                 //8XY5 	Math 	Vx -= Vy 	VY is subtracted from VX. VF is set to 0 when there's a borrow, and 1 when there isn't.
                 // TODO IMPLEMENT CARRY !!!
                 V[x()] -= V[y()];
                 break;
-            case 0x8FF6:
+            case 0x8006:
                 //8XY6 	BitOp 	Vx>>=1 	Stores the least significant bit of VX in VF and then shifts VX to the right by 1.
                 V[0xF] = V[x()] & 0x1;
                 V[x()] >>= 1;
                 break;
-            case 0x8FF7:
+            case 0x8007:
                 //8XY7 	Math 	Vx=Vy-Vx 	Sets VX to VY minus VX. VF is set to 0 when there's a borrow, and 1 when there isn't.
                 // TODO IMPLEMENT BORROW
                 V[x()] = V[y()] - V[x()];
                 break;
-            case 0x8FFE:
+            case 0x800E:
                 //8XYE 	BitOp 	Vx<<=1 	Stores the most significant bit of VX in VF and then shifts VX to the left by 1.
                 V[0xF] = V[x()] & 0x8;
                 V[x()] <<= 1;
@@ -234,11 +233,11 @@ public class Cpu {
     }
 
     private void decodeAndExecute0xF() {
-        System.out.println(opcode & 0xF0FF);
         switch (opcode & 0xF0FF) {
             case 0xF007:
                 //FX07 	Timer 	Vx = get_delay() 	Sets VX to the value of the delay timer. 
                 V[x()] = delayTimer;
+                pc += 2;
                 break;
             case 0xF00A:
                 //FX0A 	KeyOp 	Vx = get_key() 	A key press is awaited, and then stored in VX. (Blocking Operation. All instruction halted until next key event) 
@@ -247,18 +246,22 @@ public class Cpu {
             case 0xF015:
                 //FX15 	Timer 	delay_timer(Vx) 	Sets the delay timer to VX. 
                 delayTimer = V[x()];
+                pc += 2;
                 break;
             case 0xF018:
                 //FX18 	Sound 	sound_timer(Vx) 	Sets the sound timer to VX. 
                 soundTimer = V[x()];
+                pc += 2;
                 break;
             case 0xF01E:
                 //FX1E 	MEM 	I +=Vx 	Adds VX to I.
                 I += V[x()];
+                pc += 2;
                 break;
             case 0xF029:
                 //FX29 	MEM 	I=sprite_addr[Vx] 	Sets I to the location of the sprite for the character in VX. Characters 0-F (in hexadecimal) are represented by a 4x5 font. 
-                warnUnsupportedOpcode();
+                I = V[x()] * 5; //// TODO thats probably wrong
+                pc += 2;
                 break;
             case 0xF033:
                 //FX33 	BCD 	set_BCD(Vx);    *(I+0)=BCD(3);  *(I+1)=BCD(2);  *(I+2)=BCD(1);
@@ -270,11 +273,17 @@ public class Cpu {
                 break;
             case 0xF055:
                 //FX55 	MEM 	reg_dump(Vx,&I) 	Stores V0 to VX (including VX) in memory starting at address I. The offset from I is increased by 1 for each value written, but I itself is left unmodified. 
-                warnUnsupportedOpcode();
+                for (int i = 0; x() > i; i++) {
+                    memory[I + i] = V[0 + i];
+                }
+                pc += 2;
                 break;
             case 0xF065:
                 //FX65 	MEM 	reg_load(Vx,&I) 	Fills V0 to VX (including VX) with values from memory starting at address I. The offset from I is increased by 1 for each value written, but I itself is left unmodified. 
-                warnUnsupportedOpcode();
+                for (int i = 0; x() > i; i++) {
+                    V[0 + i] = memory[I + i];
+                }
+                pc += 2;
                 break;
             default:
                 warnUnsupportedOpcode();
@@ -294,7 +303,7 @@ public class Cpu {
     }
 
     public void infoFetchedOpcode() {
-        System.out.println(Integer.toHexString(opcode) + "");
+        System.out.println("Adress: " + Integer.toHexString(pc) + " Opcode: " + Integer.toHexString(opcode) + "");
     }
 
     private int opcodeHeader() {
