@@ -192,23 +192,28 @@ public class Cpu {
                 break;
             case 0x8FF4:
                 //8XY4 	Math 	Vx += Vy 	Adds VY to VX. VF is set to 1 when there's a carry, and to 0 when there isn't. 
+                //TODO IMPLEMENT CARRY !!!
                 V[x()] += V[y()];
                 break;
             case 0x8FF5:
-                //8XY5 	Math 	Vx -= Vy 	VY is subtracted from VX. VF is set to 0 when there's a borrow, and 1 when there isn't. 
+                //8XY5 	Math 	Vx -= Vy 	VY is subtracted from VX. VF is set to 0 when there's a borrow, and 1 when there isn't.
+                // TODO IMPLEMENT CARRY !!!
                 V[x()] -= V[y()];
                 break;
             case 0x8FF6:
                 //8XY6 	BitOp 	Vx>>=1 	Stores the least significant bit of VX in VF and then shifts VX to the right by 1.
-                warnUnsupportedOpcode();
+                V[0xF] = V[x()] & 0x1;
+                V[x()] >>= 1;
                 break;
             case 0x8FF7:
-                //8XY7 	Math 	Vx=Vy-Vx 	Sets VX to VY minus VX. VF is set to 0 when there's a borrow, and 1 when there isn't. 
-                warnUnsupportedOpcode();
+                //8XY7 	Math 	Vx=Vy-Vx 	Sets VX to VY minus VX. VF is set to 0 when there's a borrow, and 1 when there isn't.
+                // TODO IMPLEMENT BORROW
+                V[x()] = V[y()] - V[x()];
                 break;
             case 0x8FFE:
-                //8XYE 	BitOp 	Vx<<=1 	Stores the most significant bit of VX in VF and then shifts VX to the left by 1.[3]
-                warnUnsupportedOpcode();
+                //8XYE 	BitOp 	Vx<<=1 	Stores the most significant bit of VX in VF and then shifts VX to the left by 1.
+                V[0xF] = V[x()] & 0x8;
+                V[x()] <<= 1;
                 break;
             default:
                 warnUnsupportedOpcode();
