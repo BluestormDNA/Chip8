@@ -39,7 +39,7 @@ public class Cpu {
     }
 
     public void decodeAndExecute() {
-        switch (opcode & 0xF000) {
+        switch ((opcode & 0xF000) >> 12) {
             case 0x0:
                 decodeAndExecute0x0();
                 break;
@@ -180,7 +180,16 @@ public class Cpu {
     }
 
     private void decodeAndExecute0xE() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        switch (opcode & 0xF0FF) {
+            case 0xE09E:
+                //EX9E 	KeyOp 	if(key()==Vx) 	Skips the next instruction if the key stored in VX is pressed. (Usually the next instruction is a jump to skip a code block) 
+                warnUnsupportedOpcode();
+                break;
+            case 0xE0A1:
+                //EXA1 	KeyOp 	if(key()!=Vx) 	Skips the next instruction if the key stored in VX isn't pressed. (Usually the next instruction is a jump to skip a code block) 
+                warnUnsupportedOpcode();
+                break;
+        }
     }
 
     private void decodeAndExecute0xF() {
