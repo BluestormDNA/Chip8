@@ -62,11 +62,17 @@ public class Cpu {
                 break;
             case 0x4000:
                 //4XNN 	Cond 	if(Vx!=NN) 	Skips the next instruction if VX doesn't equal NN. (Usually the next instruction is a jump to skip a code block) 
-                warnUnsupportedOpcode();
+                if (V[(opcode & 0x0F00) >> 8] != (opcode & 0x00FF)) {
+                    pc += 2;
+                }
+                pc += 2;
                 break;
             case 0x5000:
                 //5XY0 	Cond 	if(Vx==Vy) 	Skips the next instruction if VX equals VY.
-                warnUnsupportedOpcode();
+                if (V[(opcode & 0x0F00) >> 8] == V[(opcode & 0x00F0) >> 4]) {
+                    pc += 2;
+                }
+                pc += 2;
                 break;
             case 0x6000:
                 //6xkk - LD Vx, byte
