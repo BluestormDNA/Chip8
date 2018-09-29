@@ -85,6 +85,7 @@ public class Cpu {
                 //7XNN  Const Vx += NN  Adds NN to VX. (Carry flag is not changed)
                 V[x()] += nn(); // esto probablemente haga overflow...
                 pc += 2;
+                //System.out.println("OPCODE 7 OPS: x = " + x() + " Vx = " + V[x()]);
                 break;
             case 0x8:
                 decodeAndExecute0x8();
@@ -108,6 +109,7 @@ public class Cpu {
             case 0xC:
                 //CXNN 	Rand 	Vx=rand()&NN 	Sets VX to the result of a bitwise and operation on a random number (Typically: 0 to 255) and NN. 
                 V[x()] = (int) (Math.random() * 255) & nn(); //Todo check this...
+                //System.out.println(V[x()] + "<--------------------------------RANDOM 0 255??------------------------------------");
                 pc += 2;
                 break;
             case 0xD:
@@ -172,6 +174,7 @@ public class Cpu {
     }
 
     private void decodeAndExecute0x8() {
+        System.err.println("==========WARNING BRANCH 8==========");
         switch (opcode & 0xF00F) {
             case 0x8000:
                 //8XY0 	Assign 	Vx=Vy 	Sets VX to the value of VY. 
@@ -191,12 +194,16 @@ public class Cpu {
                 break;
             case 0x8004:
                 //8XY4 	Math 	Vx += Vy 	Adds VY to VX. VF is set to 1 when there's a carry, and to 0 when there isn't. 
-                //TODO IMPLEMENT CARRY !!!
+                //TODO revisit carry
+                System.err.println("CARRY PROBLEMS------------");
+                V[0xF] = ((V[x()] += V[y()]) > 255) ? 1 : 0;
                 V[x()] += V[y()];
                 break;
             case 0x8005:
                 //8XY5 	Math 	Vx -= Vy 	VY is subtracted from VX. VF is set to 0 when there's a borrow, and 1 when there isn't.
-                // TODO IMPLEMENT CARRY !!!
+                // TODO revisit code
+                System.err.println("CARRY PROBLEMS------------");
+                V[0xF] = (V[x()] < V[y()]) ? 0 : 1;
                 V[x()] -= V[y()];
                 break;
             case 0x8006:
@@ -206,8 +213,11 @@ public class Cpu {
                 break;
             case 0x8007:
                 //8XY7 	Math 	Vx=Vy-Vx 	Sets VX to VY minus VX. VF is set to 0 when there's a borrow, and 1 when there isn't.
-                // TODO IMPLEMENT BORROW
+                // recode borrow
+                System.err.println("CARRY PROBLEMS------------");
+                V[0xF] = (V[y()] < V[x()]) ? 0 : 1;
                 V[x()] = V[y()] - V[x()];
+                System.err.println(V[x()]);
                 break;
             case 0x800E:
                 //8XYE 	BitOp 	Vx<<=1 	Stores the most significant bit of VX in VF and then shifts VX to the left by 1.
@@ -266,9 +276,9 @@ public class Cpu {
             case 0xF033:
                 //FX33 	BCD 	set_BCD(Vx);    *(I+0)=BCD(3);  *(I+1)=BCD(2);  *(I+2)=BCD(1);
                 //Stores the binary-coded decimal representation of VX, with the most significant of three digits at the address in I, the middle digit at I plus 1, and the least significant digit at I plus 2. (In other words, take the decimal representation of VX, place the hundreds digit in memory at location in I, the tens digit at location I+1, and the ones digit at location I+2.) 
-                memory[I] = V[x()] % 10;
-                memory[I + 1] = V[x()] / 10 % 10;
-                memory[I + 2] = V[x()] / 100 % 10;
+                memory[I] = V[x()] / 100;
+                memory[I + 1] = (V[x()] / 10) % 10;
+                memory[I + 2] = V[x()] % 10;
                 pc += 2;
                 break;
             case 0xF055:
@@ -290,6 +300,16 @@ public class Cpu {
         }
     }
 
+    public void updateTimers() {
+        if (delayTimer > 0) {
+            delayTimer--;
+        }
+        if (soundTimer > 0) {
+            soundTimer--;
+        }
+        // TODO MAKE NOISES
+    }
+
     public boolean isDrawFlag() {
         return drawFlag;
     }
@@ -303,7 +323,7 @@ public class Cpu {
     }
 
     public void infoFetchedOpcode() {
-        System.out.println("Adress: " + Integer.toHexString(pc) + " Opcode: " + Integer.toHexString(opcode) + "");
+        System.out.println("Adress: " + Integer.toHexString(pc) + " Opcode: " + Integer.toHexString(opcode) + " V0 " + V[0]);
     }
 
     private int opcodeHeader() {
