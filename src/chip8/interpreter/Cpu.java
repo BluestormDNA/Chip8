@@ -145,7 +145,7 @@ public class Cpu {
                 decodeAndExecute0xE();
                 break;
 
-            case 0xF000:
+            case 0xF:
                 decodeAndExecute0xF();
                 break;
 
@@ -234,10 +234,11 @@ public class Cpu {
     }
 
     private void decodeAndExecute0xF() {
+        System.out.println(opcode & 0xF0FF);
         switch (opcode & 0xF0FF) {
             case 0xF007:
                 //FX07 	Timer 	Vx = get_delay() 	Sets VX to the value of the delay timer. 
-                warnUnsupportedOpcode();
+                V[x()] = delayTimer;
                 break;
             case 0xF00A:
                 //FX0A 	KeyOp 	Vx = get_key() 	A key press is awaited, and then stored in VX. (Blocking Operation. All instruction halted until next key event) 
@@ -245,15 +246,15 @@ public class Cpu {
                 break;
             case 0xF015:
                 //FX15 	Timer 	delay_timer(Vx) 	Sets the delay timer to VX. 
-                warnUnsupportedOpcode();
+                delayTimer = V[x()];
                 break;
             case 0xF018:
                 //FX18 	Sound 	sound_timer(Vx) 	Sets the sound timer to VX. 
-                warnUnsupportedOpcode();
+                soundTimer = V[x()];
                 break;
             case 0xF01E:
                 //FX1E 	MEM 	I +=Vx 	Adds VX to I.
-                warnUnsupportedOpcode();
+                I += V[x()];
                 break;
             case 0xF029:
                 //FX29 	MEM 	I=sprite_addr[Vx] 	Sets I to the location of the sprite for the character in VX. Characters 0-F (in hexadecimal) are represented by a 4x5 font. 
@@ -262,7 +263,10 @@ public class Cpu {
             case 0xF033:
                 //FX33 	BCD 	set_BCD(Vx);    *(I+0)=BCD(3);  *(I+1)=BCD(2);  *(I+2)=BCD(1);
                 //Stores the binary-coded decimal representation of VX, with the most significant of three digits at the address in I, the middle digit at I plus 1, and the least significant digit at I plus 2. (In other words, take the decimal representation of VX, place the hundreds digit in memory at location in I, the tens digit at location I+1, and the ones digit at location I+2.) 
-                warnUnsupportedOpcode();
+                memory[I] = V[x()] % 10;
+                memory[I + 1] = V[x()] / 10 % 10;
+                memory[I + 2] = V[x()] / 100 % 10;
+                pc += 2;
                 break;
             case 0xF055:
                 //FX55 	MEM 	reg_dump(Vx,&I) 	Stores V0 to VX (including VX) in memory starting at address I. The offset from I is increased by 1 for each value written, but I itself is left unmodified. 
