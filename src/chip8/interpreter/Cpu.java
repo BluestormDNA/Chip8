@@ -176,27 +176,27 @@ public class Cpu {
         switch (opcode & 0xF0FF) {
             case 0x8FF0:
                 //8XY0 	Assign 	Vx=Vy 	Sets VX to the value of VY. 
-                warnUnsupportedOpcode();
+                V[x()] = V[y()];
                 break;
             case 0x8FF1:
                 //8XY1 	BitOp 	Vx=Vx|Vy 	Sets VX to VX or VY. (Bitwise OR operation) 
-                warnUnsupportedOpcode();
+                V[x()] |= V[y()];
                 break;
             case 0x8FF2:
                 //8XY2 	BitOp 	Vx=Vx&Vy 	Sets VX to VX and VY. (Bitwise AND operation) 
-                warnUnsupportedOpcode();
+                V[x()] &= V[y()];
                 break;
             case 0x8FF3:
                 //8XY3 	BitOp 	Vx=Vx^Vy 	Sets VX to VX xor VY. 
-                warnUnsupportedOpcode();
+                V[x()] ^= V[y()];
                 break;
             case 0x8FF4:
                 //8XY4 	Math 	Vx += Vy 	Adds VY to VX. VF is set to 1 when there's a carry, and to 0 when there isn't. 
-                warnUnsupportedOpcode();
+                V[x()] += V[y()];
                 break;
             case 0x8FF5:
                 //8XY5 	Math 	Vx -= Vy 	VY is subtracted from VX. VF is set to 0 when there's a borrow, and 1 when there isn't. 
-                warnUnsupportedOpcode();
+                V[x()] -= V[y()];
                 break;
             case 0x8FF6:
                 //8XY6 	BitOp 	Vx>>=1 	Stores the least significant bit of VX in VF and then shifts VX to the right by 1.
@@ -311,5 +311,5 @@ public class Cpu {
     private int nnn() {
         return opcode & 0x0FFF;
     }
-    
+
 }
