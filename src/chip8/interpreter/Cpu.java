@@ -21,6 +21,9 @@ public class Cpu {
     private final int[] stack;
     private final int[] memory;
 
+    private int delayTimer;
+    private int soundTimer;
+
     private final int[] gfx;
     private boolean drawFlag;
 
@@ -39,48 +42,48 @@ public class Cpu {
     }
 
     public void decodeAndExecute() {
-        switch ((opcode & 0xF000) >> 12) {
+        switch (opcodeHeader()) {
             case 0x0:
                 decodeAndExecute0x0();
                 break;
             case 0x1:
                 //1NNN 	Flow 	goto NNN; 	Jumps to address NNN.
-                pc = opcode & 0x0FFF;
+                pc = nnn();
                 break;
             case 0x2:
                 //2NNN 	Flow 	*(0xNNN)() 	Calls subroutine at NNN. 
                 stack[stackPointer++] = pc;
-                pc = opcode & 0x0FFF;
+                pc = nnn();
                 break;
             case 0x3:
                 //3XNN 	Cond 	if(Vx==NN) 	Skips the next instruction if VX equals NN.
-                if (V[(opcode & 0x0F00) >> 8] == (opcode & 0x00FF)) {
+                if (V[x()] == nn()) {
                     pc += 2;
                 }
                 pc += 2;
                 break;
             case 0x4:
                 //4XNN 	Cond 	if(Vx!=NN) 	Skips the next instruction if VX doesn't equal NN. (Usually the next instruction is a jump to skip a code block) 
-                if (V[(opcode & 0x0F00) >> 8] != (opcode & 0x00FF)) {
+                if (V[x()] != nn()) {
                     pc += 2;
                 }
                 pc += 2;
                 break;
             case 0x5:
                 //5XY0 	Cond 	if(Vx==Vy) 	Skips the next instruction if VX equals VY.
-                if (V[(opcode & 0x0F00) >> 8] == V[(opcode & 0x00F0) >> 4]) {
+                if (V[x()] == V[y()]) {
                     pc += 2;
                 }
                 pc += 2;
                 break;
             case 0x6:
                 //6XNN 	Const 	Vx = NN 	Sets VX to NN. 
-                V[(opcode & 0x0F00) >> 8] = opcode & 0x00FF;
+                V[x()] = nn();
                 pc += 2;
                 break;
             case 0x7:
                 //7XNN  Const Vx += NN  Adds NN to VX. (Carry flag is not changed)
-                V[(opcode & 0x0F00) >> 8] += opcode & 0x00FF; // esto probablemente haga overflow...
+                V[x()] += nn(); // esto probablemente haga overflow...
                 pc += 2;
                 break;
             case 0x8:
@@ -88,30 +91,30 @@ public class Cpu {
                 break;
             case 0x9:
                 //9XY0 	Cond 	if(Vx!=Vy) 	Skips the next instruction if VX doesn't equal VY.
-                if (V[(opcode & 0x0F00) >> 8] != V[(opcode & 0x00F0) >> 4]) {
+                if (V[x()] != V[y()]) {
                     pc += 2;
                 }
                 pc += 2;
                 break;
             case 0xA:
                 //ANNN 	MEM 	I = NNN 	Sets I to the address NNN. 
-                I = opcode & 0x0FFF;
+                I = nnn();
                 pc += 2;
                 break;
             case 0xB:
                 //BNNN 	Flow 	PC=V0+NNN 	Jumps to the address NNN plus V0. 
-                pc = V[0] + (opcode & 0x0FFF);
+                pc = V[0] + nnn();
                 break;
             case 0xC:
                 //CXNN 	Rand 	Vx=rand()&NN 	Sets VX to the result of a bitwise and operation on a random number (Typically: 0 to 255) and NN. 
-                V[(opcode & 0x0F00) >> 8] = (int) (Math.random() * 255) & (opcode & 0x00FF); //Todo check this...
+                V[x()] = (int) (Math.random() * 255) & nn(); //Todo check this...
                 pc += 2;
                 break;
             case 0xD:
                 //DXYN 	Disp 	draw(Vx,Vy,N) 	Draws a sprite at coordinate (VX, VY) that has a width of 8 pixels and a height of N pixels. Each row of 8 pixels is read as bit-coded starting from memory location I; I value doesn’t change after the execution of this instruction. As described above, VF is set to 1 if any screen pixels are flipped from set to unset when the sprite is drawn, and to 0 if that doesn’t happen 
-                int x = V[(opcode & 0x0F00) >> 8];
-                int y = V[(opcode & 0x00F0) >> 4];
-                int n = opcode & 0x000F;
+                int x = V[x()];
+                int y = V[y()];
+                int n = n();
                 int[] sprite = new int[n];
                 System.arraycopy(memory, I, sprite, 0, n);
 
@@ -285,4 +288,28 @@ public class Cpu {
         System.out.println(Integer.toHexString(opcode) + "");
     }
 
+    private int opcodeHeader() {
+        return (opcode & 0xF000) >> 12;
+    }
+
+    private int x() {
+        return (opcode & 0x0F00) >> 8;
+    }
+
+    private int y() {
+        return (opcode & 0x00F0) >> 4;
+    }
+
+    private int n() {
+        return opcode & 0x000F;
+    }
+
+    private int nn() {
+        return opcode & 0x00FF;
+    }
+
+    private int nnn() {
+        return opcode & 0x0FFF;
+    }
+    
 }
