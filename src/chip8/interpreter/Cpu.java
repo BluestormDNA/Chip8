@@ -105,6 +105,7 @@ public class Cpu {
             case 0xC:
                 //CXNN 	Rand 	Vx=rand()&NN 	Sets VX to the result of a bitwise and operation on a random number (Typically: 0 to 255) and NN. 
                 V[(opcode & 0x0F00) >> 8] = (int) (Math.random() * 255) & (opcode & 0x00FF); //Todo check this...
+                pc += 2;
                 break;
             case 0xD:
                 //DXYN 	Disp 	draw(Vx,Vy,N) 	Draws a sprite at coordinate (VX, VY) that has a width of 8 pixels and a height of N pixels. Each row of 8 pixels is read as bit-coded starting from memory location I; I value doesn’t change after the execution of this instruction. As described above, VF is set to 1 if any screen pixels are flipped from set to unset when the sprite is drawn, and to 0 if that doesn’t happen 
@@ -143,7 +144,6 @@ public class Cpu {
 
             case 0xF000:
                 decodeAndExecute0xF();
-
                 break;
 
             default:
@@ -164,14 +164,47 @@ public class Cpu {
                 pc = stack[--stackPointer];
                 pc += 2;
                 break;
-            default: //0nnn omited This instruction is only used on the old computers on which Chip-8 was originally implemented. It is ignored by modern interpreters.
+            default: //0nnn This instruction is only used on the old computers on which Chip-8 was originally implemented. It is ignored by modern interpreters.
                 warnUnsupportedOpcode();
         }
     }
 
     private void decodeAndExecute0x8() {
         switch (opcode & 0xF0FF) {
-            case 0xF033:
+            case 0x8FF0:
+                //8XY0 	Assign 	Vx=Vy 	Sets VX to the value of VY. 
+                warnUnsupportedOpcode();
+                break;
+            case 0x8FF1:
+                //8XY1 	BitOp 	Vx=Vx|Vy 	Sets VX to VX or VY. (Bitwise OR operation) 
+                warnUnsupportedOpcode();
+                break;
+            case 0x8FF2:
+                //8XY2 	BitOp 	Vx=Vx&Vy 	Sets VX to VX and VY. (Bitwise AND operation) 
+                warnUnsupportedOpcode();
+                break;
+            case 0x8FF3:
+                //8XY3 	BitOp 	Vx=Vx^Vy 	Sets VX to VX xor VY. 
+                warnUnsupportedOpcode();
+                break;
+            case 0x8FF4:
+                //8XY4 	Math 	Vx += Vy 	Adds VY to VX. VF is set to 1 when there's a carry, and to 0 when there isn't. 
+                warnUnsupportedOpcode();
+                break;
+            case 0x8FF5:
+                //8XY5 	Math 	Vx -= Vy 	VY is subtracted from VX. VF is set to 0 when there's a borrow, and 1 when there isn't. 
+                warnUnsupportedOpcode();
+                break;
+            case 0x8FF6:
+                //8XY6 	BitOp 	Vx>>=1 	Stores the least significant bit of VX in VF and then shifts VX to the right by 1.
+                warnUnsupportedOpcode();
+                break;
+            case 0x8FF7:
+                //8XY7 	Math 	Vx=Vy-Vx 	Sets VX to VY minus VX. VF is set to 0 when there's a borrow, and 1 when there isn't. 
+                warnUnsupportedOpcode();
+                break;
+            case 0x8FFE:
+                //8XYE 	BitOp 	Vx<<=1 	Stores the most significant bit of VX in VF and then shifts VX to the left by 1.[3]
                 warnUnsupportedOpcode();
                 break;
             default:
@@ -182,11 +215,11 @@ public class Cpu {
     private void decodeAndExecute0xE() {
         switch (opcode & 0xF0FF) {
             case 0xE09E:
-                //EX9E 	KeyOp 	if(key()==Vx) 	Skips the next instruction if the key stored in VX is pressed. (Usually the next instruction is a jump to skip a code block) 
+                //EX9E 	KeyOp 	if(key()==Vx) 	Skips the next instruction if the key stored in VX is pressed.
                 warnUnsupportedOpcode();
                 break;
             case 0xE0A1:
-                //EXA1 	KeyOp 	if(key()!=Vx) 	Skips the next instruction if the key stored in VX isn't pressed. (Usually the next instruction is a jump to skip a code block) 
+                //EXA1 	KeyOp 	if(key()!=Vx) 	Skips the next instruction if the key stored in VX isn't pressed.
                 warnUnsupportedOpcode();
                 break;
         }
@@ -194,7 +227,41 @@ public class Cpu {
 
     private void decodeAndExecute0xF() {
         switch (opcode & 0xF0FF) {
+            case 0xF007:
+                //FX07 	Timer 	Vx = get_delay() 	Sets VX to the value of the delay timer. 
+                warnUnsupportedOpcode();
+                break;
+            case 0xF00A:
+                //FX0A 	KeyOp 	Vx = get_key() 	A key press is awaited, and then stored in VX. (Blocking Operation. All instruction halted until next key event) 
+                warnUnsupportedOpcode();
+                break;
+            case 0xF015:
+                //FX15 	Timer 	delay_timer(Vx) 	Sets the delay timer to VX. 
+                warnUnsupportedOpcode();
+                break;
+            case 0xF018:
+                //FX18 	Sound 	sound_timer(Vx) 	Sets the sound timer to VX. 
+                warnUnsupportedOpcode();
+                break;
+            case 0xF01E:
+                //FX1E 	MEM 	I +=Vx 	Adds VX to I.
+                warnUnsupportedOpcode();
+                break;
+            case 0xF029:
+                //FX29 	MEM 	I=sprite_addr[Vx] 	Sets I to the location of the sprite for the character in VX. Characters 0-F (in hexadecimal) are represented by a 4x5 font. 
+                warnUnsupportedOpcode();
+                break;
             case 0xF033:
+                //FX33 	BCD 	set_BCD(Vx);    *(I+0)=BCD(3);  *(I+1)=BCD(2);  *(I+2)=BCD(1);
+                //Stores the binary-coded decimal representation of VX, with the most significant of three digits at the address in I, the middle digit at I plus 1, and the least significant digit at I plus 2. (In other words, take the decimal representation of VX, place the hundreds digit in memory at location in I, the tens digit at location I+1, and the ones digit at location I+2.) 
+                warnUnsupportedOpcode();
+                break;
+            case 0xF055:
+                //FX55 	MEM 	reg_dump(Vx,&I) 	Stores V0 to VX (including VX) in memory starting at address I. The offset from I is increased by 1 for each value written, but I itself is left unmodified. 
+                warnUnsupportedOpcode();
+                break;
+            case 0xF065:
+                //FX65 	MEM 	reg_load(Vx,&I) 	Fills V0 to VX (including VX) with values from memory starting at address I. The offset from I is increased by 1 for each value written, but I itself is left unmodified. 
                 warnUnsupportedOpcode();
                 break;
             default:
