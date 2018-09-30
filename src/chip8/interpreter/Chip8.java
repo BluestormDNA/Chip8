@@ -31,7 +31,7 @@ public class Chip8 extends Thread {
     public void init() {
         memory = new Memory();
         memory.loadFont();
-        memory.loadRom("./rom/INVADERS");
+        memory.loadRom("./rom/BC_test.ch8");
         gfx = new Gfx();
         cpu = new Cpu(memory, gfx);
 
