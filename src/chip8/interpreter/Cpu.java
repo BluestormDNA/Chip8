@@ -5,6 +5,7 @@
  */
 package chip8.interpreter;
 
+import java.awt.Toolkit;
 import java.util.Arrays;
 
 /**
@@ -307,9 +308,9 @@ public class Cpu {
             delayTimer--;
         }
         if (soundTimer > 0) {
+            Toolkit.getDefaultToolkit().beep();
             soundTimer--;
         }
-        // TODO MAKE NOISES
     }
 
     public boolean isDrawFlag() {
