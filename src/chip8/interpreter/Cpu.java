@@ -174,7 +174,6 @@ public class Cpu {
     }
 
     private void decodeAndExecute0x8() {
-        System.err.println("==========WARNING BRANCH 8==========");
         switch (opcode & 0xF00F) {
             case 0x8000:
                 //8XY0 	Assign 	Vx=Vy 	Sets VX to the value of VY. 
@@ -195,16 +194,16 @@ public class Cpu {
             case 0x8004:
                 //8XY4 	Math 	Vx += Vy 	Adds VY to VX. VF is set to 1 when there's a carry, and to 0 when there isn't. 
                 //TODO revisit carry
-                System.err.println("CARRY PROBLEMS------------");
                 V[0xF] = ((V[x()] += V[y()]) > 255) ? 1 : 0;
-                V[x()] += V[y()];
+                V[x()] = (V[x()] + V[y()]) & 0xFF;
+                System.err.println("DEBUG CARRY 8004 - VF " + V[0xF] + " Vx " + V[x()]);
                 break;
             case 0x8005:
                 //8XY5 	Math 	Vx -= Vy 	VY is subtracted from VX. VF is set to 0 when there's a borrow, and 1 when there isn't.
                 // TODO revisit code
-                System.err.println("CARRY PROBLEMS------------");
                 V[0xF] = (V[x()] < V[y()]) ? 0 : 1;
-                V[x()] -= V[y()];
+                V[x()] = (V[x()] - V[y()]) & 0xFF;
+                System.err.println("DEBUG CARRY 8005!!!!!!!!!!!!! - VF " + V[0xF] + " Vx " + V[x()]);
                 break;
             case 0x8006:
                 //8XY6 	BitOp 	Vx>>=1 	Stores the least significant bit of VX in VF and then shifts VX to the right by 1.
@@ -214,7 +213,7 @@ public class Cpu {
             case 0x8007:
                 //8XY7 	Math 	Vx=Vy-Vx 	Sets VX to VY minus VX. VF is set to 0 when there's a borrow, and 1 when there isn't.
                 // recode borrow
-                System.err.println("CARRY PROBLEMS------------");
+                System.err.println("CARRY PROBLEMS ???----8007----------------------------------------------!!!!----");
                 V[0xF] = (V[y()] < V[x()]) ? 0 : 1;
                 V[x()] = V[y()] - V[x()];
                 System.err.println(V[x()]);
@@ -227,6 +226,7 @@ public class Cpu {
             default:
                 warnUnsupportedOpcode();
         }
+        pc += 2;
     }
 
     private void decodeAndExecute0xE() {
@@ -234,10 +234,12 @@ public class Cpu {
             case 0xE09E:
                 //EX9E 	KeyOp 	if(key()==Vx) 	Skips the next instruction if the key stored in VX is pressed.
                 warnUnsupportedOpcode();
+                //pc = +2;
                 break;
             case 0xE0A1:
                 //EXA1 	KeyOp 	if(key()!=Vx) 	Skips the next instruction if the key stored in VX isn't pressed.
-                warnUnsupportedOpcode();
+                //todo support real keyboard check
+                pc += 2;
                 break;
         }
     }
