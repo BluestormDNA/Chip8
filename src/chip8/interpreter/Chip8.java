@@ -6,13 +6,14 @@
 package chip8.interpreter;
 
 import chip8.gui.Screen;
-import javax.swing.SwingUtilities;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author BlueStorm
  */
-public class Chip8 {
+public class Chip8 extends Thread {
 
     private Memory memory;
     private Cpu cpu;
@@ -30,23 +31,27 @@ public class Chip8 {
     public void init() {
         memory = new Memory();
         memory.loadFont();
-        memory.loadRom("./rom/pong2.c8");
+        memory.loadRom("./rom/INVADERS");
         gfx = new Gfx();
         cpu = new Cpu(memory, gfx);
 
-        //SwingUtilities.invokeLater(() -> {
         screen = new Screen(gfx);
-        //});
 
         while (true) {
             cpu.fetch();
             cpu.decodeAndExecute();
+            cpu.updateTimers();
             if (cpu.isDrawFlag()) {
-                //gfx.debugDraw();
+                screen.repaint();
                 cpu.setDrawFlag(false);
             }
-            //memory.printMem();
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(Chip8.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
+
     }
 
 }
