@@ -5,6 +5,7 @@
  */
 package chip8.interpreter;
 
+import chip8.gui.Keyboard;
 import java.awt.Toolkit;
 import java.util.Arrays;
 
@@ -28,12 +29,15 @@ public class Cpu {
     private final int[] gfx;
     private boolean drawFlag;
 
-    public Cpu(Memory memory, Gfx gfx) {
+    private final Keyboard keyboard;
+
+    public Cpu(Memory memory, Gfx gfx, Keyboard keyboard) {
         pc = 0x200;
         V = new int[0x10];
         stack = new int[0x10];
         this.memory = memory.getMemory();
         this.gfx = gfx.getGfx();
+        this.keyboard = keyboard;
         drawFlag = false;
     }
 
@@ -234,12 +238,15 @@ public class Cpu {
         switch (opcode & 0xF0FF) {
             case 0xE09E:
                 //EX9E 	KeyOp 	if(key()==Vx) 	Skips the next instruction if the key stored in VX is pressed.
-                warnUnsupportedOpcode();
-                //pc = +2;
-                break;
+                if (keyboard.getKey() == V[x()]) {
+                    pc += 2;
+                }
+                pc += 2;
             case 0xE0A1:
                 //EXA1 	KeyOp 	if(key()!=Vx) 	Skips the next instruction if the key stored in VX isn't pressed.
-                //todo support real keyboard check
+                if (keyboard.getKey() != V[x()]) {
+                    pc += 2;
+                }
                 pc += 2;
                 break;
         }
@@ -254,7 +261,9 @@ public class Cpu {
                 break;
             case 0xF00A:
                 //FX0A 	KeyOp 	Vx = get_key() 	A key press is awaited, and then stored in VX. (Blocking Operation. All instruction halted until next key event) 
-                warnUnsupportedOpcode();
+                //todo revisit this seems pretty broken...
+                while (keyboard.getKey() == -1){}
+                V[x()] = keyboard.getKey();
                 break;
             case 0xF015:
                 //FX15 	Timer 	delay_timer(Vx) 	Sets the delay timer to VX. 
