@@ -5,6 +5,7 @@
  */
 package chip8.interpreter;
 
+import chip8.gui.Keyboard;
 import chip8.gui.Screen;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -19,6 +20,7 @@ public class Chip8 extends Thread {
     private Cpu cpu;
     private Gfx gfx;
     private Screen screen;
+    private Keyboard keyboard;
 
     /**
      * @param args the command line arguments
@@ -31,11 +33,15 @@ public class Chip8 extends Thread {
     public void init() {
         memory = new Memory();
         memory.loadFont();
-        memory.loadRom("./rom/BC_test.ch8");
+        memory.loadRom("./rom/pong2.c8");
+        
         gfx = new Gfx();
-        cpu = new Cpu(memory, gfx);
+        keyboard = new Keyboard();
+        cpu = new Cpu(memory, gfx, keyboard);
 
         screen = new Screen(gfx);
+        screen.addKeyListener(keyboard);
+        
 
         while (true) {
             cpu.fetch();

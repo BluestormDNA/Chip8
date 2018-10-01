@@ -29,6 +29,7 @@ public class Screen extends JPanel {
         window.add(this);
         window.pack();
         window.setVisible(true);
+        this.setFocusable(true);
     }
 
     @Override
