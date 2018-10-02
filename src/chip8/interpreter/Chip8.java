@@ -33,7 +33,7 @@ public class Chip8 extends Thread {
     public void init() {
         memory = new Memory();
         memory.loadFont();
-        memory.loadRom("./rom/pong2.c8");
+        memory.loadRom("./rom/PONG2");
         
         gfx = new Gfx();
         keyboard = new Keyboard();

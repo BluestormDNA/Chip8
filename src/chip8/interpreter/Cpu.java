@@ -133,7 +133,7 @@ public class Cpu {
                         //System.out.println("for bit " + bit);
                         if (((sprite[line] & 0xFF) & (0x80 >> bit)) != 0) {
                             //System.out.println("if: " + (b & (0x80 >> bit)) + " " + ((0x80 >> bit) == 1));
-                            if ((gfx[x + bit + ((y + line) * 64)] ^ 1) == 0) { // THIS CRASHES ON SOME ROMS ARRAY OOB 18341 tetris
+                            if ((gfx[x + bit + ((y + line) * 64)] ^ 1) == 0) { // THIS CRASHES ON SOME ROMS ARRAY OOB 18341 tetris // 6976 invaders
                                 V[0xF] = 1;
                             }
                             gfx[x + bit + ((y + line) * 64)] ^= 1;
