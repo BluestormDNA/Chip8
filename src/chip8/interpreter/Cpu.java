@@ -90,7 +90,6 @@ public class Cpu {
                 //7XNN  Const Vx += NN  Adds NN to VX. (Carry flag is not changed)
                 V[x()] += nn(); // esto probablemente haga overflow...
                 pc += 2;
-                //System.out.println("OPCODE 7 OPS: x = " + x() + " Vx = " + V[x()]);
                 break;
             case 0x8:
                 decodeAndExecute0x8();
@@ -119,31 +118,16 @@ public class Cpu {
                 break;
             case 0xD:
                 //DXYN 	Disp 	draw(Vx,Vy,N) 	Draws a sprite at coordinate (VX, VY) that has a width of 8 pixels and a height of N pixels. Each row of 8 pixels is read as bit-coded starting from memory location I; I value doesn’t change after the execution of this instruction. As described above, VF is set to 1 if any screen pixels are flipped from set to unset when the sprite is drawn, and to 0 if that doesn’t happen 
-                int x = V[x()];
-                int y = V[y()];
-                int n = n();
-                int[] sprite = new int[n];
-                System.arraycopy(memory, I, sprite, 0, n);
-
                 V[0xF] = 0;
-
-                for (int line = 0; line < n; line++) {
-                    //System.out.println("for line " + line + " n = " + n);
+                for (int line = 0; line < n(); line++) {
                     for (int bit = 0; bit < 8; bit++) {
-                        //System.out.println("for bit " + bit);
-                        if (((sprite[line] & 0xFF) & (0x80 >> bit)) != 0) {
-                            //System.out.println("if: " + (b & (0x80 >> bit)) + " " + ((0x80 >> bit) == 1));
-                            if ((gfx[x + bit + ((y + line) * 64)] ^ 1) == 0) { // THIS CRASHES ON SOME ROMS ARRAY OOB 18341 tetris // 6976 invaders
-                                V[0xF] = 1;
-                            }
-                            gfx[x + bit + ((y + line) * 64)] ^= 1;
+                        if ((memory[I + line] & (0x80 >> bit)) != 0) {
+                            int p = ((V[x()] + bit) + ((V[y()] + line) * 64)) % 2048;
+                            V[0xF] |= (gfx[p] == 1) ? 1 : 0;
+                            gfx[p] ^= 1;
                         }
                     }
                 }
-
-                //System.out.println("drawX " + x);
-                //System.out.println("drawY " + y);
-                //System.out.println("n " + n);
                 drawFlag = true;
                 pc += 2;
                 break;
@@ -290,19 +274,25 @@ public class Cpu {
                 memory[I] = V[x()] / 100;
                 memory[I + 1] = (V[x()] / 10) % 10;
                 memory[I + 2] = V[x()] % 10;
+                System.err.println("DEBUG BCD 33 " + memory[I] + " " + memory[I + 1] + " " + memory[I + 2] +" vx "+ V[x()]);
                 pc += 2;
                 break;
             case 0xF055:
                 //FX55 	MEM 	reg_dump(Vx,&I) 	Stores V0 to VX (including VX) in memory starting at address I. The offset from I is increased by 1 for each value written, but I itself is left unmodified. 
-                for (int i = 0; i < 0xF; i++) {
+                System.err.println("DEBUG 55 dump ");
+                for (int i = 0; i <= x(); i++) {
                     memory[I + i] = V[0 + i];
+                    System.out.println("I+i " + I + i + "mem:" + memory[I+i]+ " i " + i);
+
                 }
                 pc += 2;
                 break;
             case 0xF065:
                 //FX65 	MEM 	reg_load(Vx,&I) 	Fills V0 to VX (including VX) with values from memory starting at address I. The offset from I is increased by 1 for each value written, but I itself is left unmodified. 
-                for (int i = 0; i < 0xF; i++) {
+                System.err.println("DEBUG 65 load ");
+                for (int i = 0; i <= x(); i++) {
                     V[0 + i] = memory[I + i];
+                    System.out.println("I+i " + I + i + "mem:" + memory[I+i]+ " i " + i + "vx: " + V[x()] + " x: " + x());
                 }
                 pc += 2;
                 break;
