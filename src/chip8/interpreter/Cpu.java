@@ -143,7 +143,6 @@ public class Cpu {
             default:
                 warnUnsupportedOpcode();
         }
-        System.err.println("DEBUG - V0:" + V[0] + "  V1 " + V[1] + "  V2 " + V[2] + "  V3 " + V[3] + "  V4 " + V[4] + "  V5 " + V[5] + "  V6 " + V[6] + "  V7 " + V[7] + "  V8 " + V[8] + "  V9 " + V[9] + "  VA " + V[10] + "  VB " + V[11] + "  VC " + V[12] + "  VD " + V[13] + "  VE " + V[14] + "  VF " + V[15] + " -- Actual VX :" + V[x()] + " Actual VY: " + V[y()]);
     }
 
     private void decodeAndExecute0x0() {
@@ -183,7 +182,7 @@ public class Cpu {
                 break;
             case 0x8004:
                 //8XY4 	Math 	Vx += Vy 	Adds VY to VX. VF is set to 1 when there's a carry, and to 0 when there isn't. 
-                V[0xF] = ((V[x()] += V[y()]) > 255) ? 1 : 0;
+                V[0xF] = ((V[x()] + V[y()]) > 255) ? 1 : 0;
                 V[x()] = (V[x()] + V[y()]) & 0xFF;
                 break;
             case 0x8005:
@@ -274,7 +273,7 @@ public class Cpu {
                 memory[I] = V[x()] / 100;
                 memory[I + 1] = (V[x()] / 10) % 10;
                 memory[I + 2] = V[x()] % 10;
-                System.err.println("DEBUG BCD 33 " + memory[I] + " " + memory[I + 1] + " " + memory[I + 2] +" vx "+ V[x()]);
+                System.err.println("DEBUG BCD 33 " + memory[I] + " " + memory[I + 1] + " " + memory[I + 2] + " vx " + V[x()]);
                 pc += 2;
                 break;
             case 0xF055:
@@ -282,7 +281,7 @@ public class Cpu {
                 System.err.println("DEBUG 55 dump ");
                 for (int i = 0; i <= x(); i++) {
                     memory[I + i] = V[0 + i];
-                    System.out.println("I+i " + I + i + "mem:" + memory[I+i]+ " i " + i);
+                    System.out.println("I+i " + I + i + "mem:" + memory[I + i] + " i " + i);
 
                 }
                 pc += 2;
@@ -292,7 +291,7 @@ public class Cpu {
                 System.err.println("DEBUG 65 load ");
                 for (int i = 0; i <= x(); i++) {
                     V[0 + i] = memory[I + i];
-                    System.out.println("I+i " + I + i + "mem:" + memory[I+i]+ " i " + i + "vx: " + V[x()] + " x: " + x());
+                    System.out.println("I+i " + I + i + "mem:" + memory[I + i] + " i " + i + "vx: " + V[x()] + " x: " + x());
                 }
                 pc += 2;
                 break;
@@ -324,7 +323,7 @@ public class Cpu {
     }
 
     public void infoFetchedOpcode() {
-        System.out.println("Adress: " + Integer.toHexString(pc) + " Opcode: " + Integer.toHexString(opcode) + " V0 " + V[0]);
+        System.out.println("Adress: " + Integer.toHexString(pc) + " Opcode: " + Integer.toHexString(opcode) + " V0:" + V[0] + "  V1 " + V[1] + "  V2 " + V[2] + "  V3 " + V[3] + "  V4 " + V[4] + "  V5 " + V[5] + "  V6 " + V[6] + "  V7 " + V[7] + "  V8 " + V[8] + "  V9 " + V[9] + "  VA " + V[10] + "  VB " + V[11] + "  VC " + V[12] + "  VD " + V[13] + "  VE " + V[14] + "  VF " + V[15] + " -- Actual VX :" + V[x()] + " Actual VY: " + V[y()]);
     }
 
     private int opcodeHeader() {
