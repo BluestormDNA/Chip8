@@ -19,7 +19,6 @@ import java.util.logging.Logger;
 public class Memory {
 
     private final static int ROM_MEM_OFFSET = 0x200;
-    private final static int FONT_MEM_OFFSET = 0x50;
 
     private final int[] memory;
 
@@ -44,7 +43,7 @@ public class Memory {
 
     public void loadFont() {
         for (int i = 0; i < Data.FONTSET.length; i++) {
-            memory[FONT_MEM_OFFSET + i] = Data.FONTSET[i];
+            memory[i] = Data.FONTSET[i];
         }
     }
 
