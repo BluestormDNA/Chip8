@@ -133,7 +133,7 @@ public class Cpu {
                         //System.out.println("for bit " + bit);
                         if (((sprite[line] & 0xFF) & (0x80 >> bit)) != 0) {
                             //System.out.println("if: " + (b & (0x80 >> bit)) + " " + ((0x80 >> bit) == 1));
-                            if ((gfx[x + bit + ((y + line) * 64)] ^ 1) == 0) {
+                            if ((gfx[x + bit + ((y + line) * 64)] ^ 1) == 0) { // THIS CRASHES ON SOME ROMS ARRAY OOB 18341 tetris
                                 V[0xF] = 1;
                             }
                             gfx[x + bit + ((y + line) * 64)] ^= 1;
@@ -159,6 +159,7 @@ public class Cpu {
             default:
                 warnUnsupportedOpcode();
         }
+        System.err.println("DEBUG - V0:" + V[0] + "  V1 " + V[1] + "  V2 " + V[2]+ "  V3 " + V[3]+ "  V4 " + V[4]+ "  V5 " + V[5]+ "  V6 " + V[6]+ "  V7 " + V[7]+ "  V8 " + V[8]+ "  V9 " + V[9]+ "  VA " + V[10]+ "  VB " + V[11]+ "  VC " + V[12]+ "  VD " + V[13]+ "  VE " + V[14]+ "  VF " + V[15] + " -- Actual VX :" + V[x()] + " Actual VY: " + V[y()] );
     }
 
     private void decodeAndExecute0x0() {
@@ -187,6 +188,7 @@ public class Cpu {
             case 0x8001:
                 //8XY1 	BitOp 	Vx=Vx|Vy 	Sets VX to VX or VY. (Bitwise OR operation) 
                 V[x()] |= V[y()];
+                System.err.println("EL OR" + V[x()]);
                 break;
             case 0x8002:
                 //8XY2 	BitOp 	Vx=Vx&Vy 	Sets VX to VX and VY. (Bitwise AND operation) 
@@ -206,26 +208,32 @@ public class Cpu {
             case 0x8005:
                 //8XY5 	Math 	Vx -= Vy 	VY is subtracted from VX. VF is set to 0 when there's a borrow, and 1 when there isn't.
                 // TODO revisit code
-                V[0xF] = (V[x()] < V[y()]) ? 0 : 1;
+                //Set Vx = Vx - Vy, set VF = NOT borrow.
+
+                //If Vx > Vy, then VF is set to 1, otherwise 0. Then Vy is subtracted from Vx, and the results stored in Vx.
+                V[0xF] = (V[x()] > V[y()]) ? 1 : 0;
                 V[x()] = (V[x()] - V[y()]) & 0xFF;
-                System.err.println("DEBUG CARRY 8005!!!!!!!!!!!!! - VF " + V[0xF] + " Vx " + V[x()]);
+                //System.err.println("DEBUG CARRY 8005!!!!!!!!!!!!! - VF " + V[0xF] + " V" + x()+ " " + V[x()]);
                 break;
             case 0x8006:
                 //8XY6 	BitOp 	Vx>>=1 	Stores the least significant bit of VX in VF and then shifts VX to the right by 1.
                 V[0xF] = V[x()] & 0x1;
-                V[x()] >>= 1;
+                V[x()] >>= 1 & 0xFF;
                 break;
             case 0x8007:
                 //8XY7 	Math 	Vx=Vy-Vx 	Sets VX to VY minus VX. VF is set to 0 when there's a borrow, and 1 when there isn't.
                 // recode borrow
+                //Set Vx = Vy - Vx, set VF = NOT borrow.
+                // If Vy > Vx, then VF is set to 1, otherwise 0. Then Vx is subtracted from Vy, and the results stored in Vx.
                 System.err.println("CARRY PROBLEMS ???----8007----------------------------------------------!!!!----");
-                V[0xF] = (V[y()] < V[x()]) ? 0 : 1;
-                V[x()] = V[y()] - V[x()];
-                System.err.println(V[x()]);
+                V[0xF] = (V[y()] > V[x()]) ? 1 : 0;
+                V[x()] = (V[y()] - V[x()]) & 0xFF;
+                System.err.println("DEBUG CARRY 8007! - VF " + V[0xF] + " Vx" + x()+ " " + V[x()] + " Vy" + y()+ " " + V[y()]);
                 break;
             case 0x800E:
                 //8XYE 	BitOp 	Vx<<=1 	Stores the most significant bit of VX in VF and then shifts VX to the left by 1.
-                V[0xF] = V[x()] & 0x8;
+                V[0xF] = (V[x()] & 0x80) >> 7;
+                //V[x()] <<= 1 & 0xFF; this is the implementation free.fr?
                 V[x()] <<= 1;
                 break;
             default:
@@ -262,8 +270,11 @@ public class Cpu {
             case 0xF00A:
                 //FX0A 	KeyOp 	Vx = get_key() 	A key press is awaited, and then stored in VX. (Blocking Operation. All instruction halted until next key event) 
                 //todo revisit this seems pretty broken...
-                while (keyboard.getKey() == -1){}
+                // TIC TAC TOE DOSNT WORK AND AWAITS HERE FOREVER TODO FIX
+                while (keyboard.getKey() == -1){System.out.print("w");}
+                System.err.println("OUT !!!!!");
                 V[x()] = keyboard.getKey();
+                pc += 2;
                 break;
             case 0xF015:
                 //FX15 	Timer 	delay_timer(Vx) 	Sets the delay timer to VX. 
@@ -317,7 +328,7 @@ public class Cpu {
             delayTimer--;
         }
         if (soundTimer > 0) {
-            Toolkit.getDefaultToolkit().beep();
+            //Toolkit.getDefaultToolkit().beep();
             soundTimer--;
         }
     }
