@@ -159,7 +159,7 @@ public class Cpu {
             default:
                 warnUnsupportedOpcode();
         }
-        System.err.println("DEBUG - V0:" + V[0] + "  V1 " + V[1] + "  V2 " + V[2]+ "  V3 " + V[3]+ "  V4 " + V[4]+ "  V5 " + V[5]+ "  V6 " + V[6]+ "  V7 " + V[7]+ "  V8 " + V[8]+ "  V9 " + V[9]+ "  VA " + V[10]+ "  VB " + V[11]+ "  VC " + V[12]+ "  VD " + V[13]+ "  VE " + V[14]+ "  VF " + V[15] + " -- Actual VX :" + V[x()] + " Actual VY: " + V[y()] );
+        System.err.println("DEBUG - V0:" + V[0] + "  V1 " + V[1] + "  V2 " + V[2] + "  V3 " + V[3] + "  V4 " + V[4] + "  V5 " + V[5] + "  V6 " + V[6] + "  V7 " + V[7] + "  V8 " + V[8] + "  V9 " + V[9] + "  VA " + V[10] + "  VB " + V[11] + "  VC " + V[12] + "  VD " + V[13] + "  VE " + V[14] + "  VF " + V[15] + " -- Actual VX :" + V[x()] + " Actual VY: " + V[y()]);
     }
 
     private void decodeAndExecute0x0() {
@@ -257,7 +257,9 @@ public class Cpu {
                 //FX0A 	KeyOp 	Vx = get_key() 	A key press is awaited, and then stored in VX. (Blocking Operation. All instruction halted until next key event) 
                 //todo revisit this seems pretty broken...
                 // TIC TAC TOE DOSNT WORK AND AWAITS HERE FOREVER TODO FIX
-                while (keyboard.getKey() == -1){System.out.print("w");}
+                while (keyboard.getKey() == -1) {
+                    System.out.print("w");
+                }
                 System.err.println("OUT !!!!!");
                 V[x()] = keyboard.getKey();
                 pc += 2;
@@ -292,14 +294,14 @@ public class Cpu {
                 break;
             case 0xF055:
                 //FX55 	MEM 	reg_dump(Vx,&I) 	Stores V0 to VX (including VX) in memory starting at address I. The offset from I is increased by 1 for each value written, but I itself is left unmodified. 
-                for (int i = 0; x() > i; i++) {
+                for (int i = 0; i < 0xF; i++) {
                     memory[I + i] = V[0 + i];
                 }
                 pc += 2;
                 break;
             case 0xF065:
                 //FX65 	MEM 	reg_load(Vx,&I) 	Fills V0 to VX (including VX) with values from memory starting at address I. The offset from I is increased by 1 for each value written, but I itself is left unmodified. 
-                for (int i = 0; x() > i; i++) {
+                for (int i = 0; i < 0xF; i++) {
                     V[0 + i] = memory[I + i];
                 }
                 pc += 2;
