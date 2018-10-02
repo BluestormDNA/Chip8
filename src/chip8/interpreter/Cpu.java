@@ -88,7 +88,7 @@ public class Cpu {
                 break;
             case 0x7:
                 //7XNN  Const Vx += NN  Adds NN to VX. (Carry flag is not changed)
-                V[x()] += nn(); // esto probablemente haga overflow...
+                V[x()] = (V[x()] + nn()) & 0xFF;
                 pc += 2;
                 break;
             case 0x8:
