@@ -188,7 +188,6 @@ public class Cpu {
             case 0x8001:
                 //8XY1 	BitOp 	Vx=Vx|Vy 	Sets VX to VX or VY. (Bitwise OR operation) 
                 V[x()] |= V[y()];
-                System.err.println("EL OR" + V[x()]);
                 break;
             case 0x8002:
                 //8XY2 	BitOp 	Vx=Vx&Vy 	Sets VX to VX and VY. (Bitwise AND operation) 
@@ -200,20 +199,13 @@ public class Cpu {
                 break;
             case 0x8004:
                 //8XY4 	Math 	Vx += Vy 	Adds VY to VX. VF is set to 1 when there's a carry, and to 0 when there isn't. 
-                //TODO revisit carry
                 V[0xF] = ((V[x()] += V[y()]) > 255) ? 1 : 0;
                 V[x()] = (V[x()] + V[y()]) & 0xFF;
-                System.err.println("DEBUG CARRY 8004 - VF " + V[0xF] + " Vx " + V[x()]);
                 break;
             case 0x8005:
                 //8XY5 	Math 	Vx -= Vy 	VY is subtracted from VX. VF is set to 0 when there's a borrow, and 1 when there isn't.
-                // TODO revisit code
-                //Set Vx = Vx - Vy, set VF = NOT borrow.
-
-                //If Vx > Vy, then VF is set to 1, otherwise 0. Then Vy is subtracted from Vx, and the results stored in Vx.
                 V[0xF] = (V[x()] > V[y()]) ? 1 : 0;
                 V[x()] = (V[x()] - V[y()]) & 0xFF;
-                //System.err.println("DEBUG CARRY 8005!!!!!!!!!!!!! - VF " + V[0xF] + " V" + x()+ " " + V[x()]);
                 break;
             case 0x8006:
                 //8XY6 	BitOp 	Vx>>=1 	Stores the least significant bit of VX in VF and then shifts VX to the right by 1.
@@ -222,18 +214,12 @@ public class Cpu {
                 break;
             case 0x8007:
                 //8XY7 	Math 	Vx=Vy-Vx 	Sets VX to VY minus VX. VF is set to 0 when there's a borrow, and 1 when there isn't.
-                // recode borrow
-                //Set Vx = Vy - Vx, set VF = NOT borrow.
-                // If Vy > Vx, then VF is set to 1, otherwise 0. Then Vx is subtracted from Vy, and the results stored in Vx.
-                System.err.println("CARRY PROBLEMS ???----8007----------------------------------------------!!!!----");
                 V[0xF] = (V[y()] > V[x()]) ? 1 : 0;
                 V[x()] = (V[y()] - V[x()]) & 0xFF;
-                System.err.println("DEBUG CARRY 8007! - VF " + V[0xF] + " Vx" + x()+ " " + V[x()] + " Vy" + y()+ " " + V[y()]);
                 break;
             case 0x800E:
                 //8XYE 	BitOp 	Vx<<=1 	Stores the most significant bit of VX in VF and then shifts VX to the left by 1.
                 V[0xF] = (V[x()] & 0x80) >> 7;
-                //V[x()] <<= 1 & 0xFF; this is the implementation free.fr?
                 V[x()] <<= 1;
                 break;
             default:
