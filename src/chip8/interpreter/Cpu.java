@@ -204,20 +204,13 @@ public class Cpu {
     private void decodeAndExecute0xF() {
         switch (opcode & 0xF0FF) {
             case 0xF007: //FX07 Timer  Vx = get_delay()  Sets VX to the value of the delay timer. 
-                
+
                 V[x()] = delayTimer;
                 break;
             case 0xF00A: //FX0A KeyOp  Vx = get_key()  A key press is awaited, and then stored in VX. (Blocking Operation. All instruction halted until next key event)
-                //todo revisit this seems pretty broken...
-                // TIC TAC TOE DOSNT WORK AND AWAITS HERE FOREVER TODO FIX
                 while (keyboard.getKey() == -1) {
-                    try {
-                        Thread.sleep(300);
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(Cpu.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+                    Thread.yield();
                 }
-                System.err.println("OUT !!!!!");
                 V[x()] = keyboard.getKey();
                 break;
             case 0xF015: //FX15 Timer  delay_timer(Vx)  Sets the delay timer to VX. 
