@@ -16,9 +16,4 @@ What has been implemented:
 Todo List:
 * Sound
 
-
-A legacy Pong Screen from the first builds boot when only a bunch of opcodes where implemented (00EE, 1nnn, 2nnn, 3xnn, 6xkk, 7xnn, Annn and partial Dxyn:
-
-
-![Pong2](https://user-images.githubusercontent.com/28767885/46166952-c58b7700-c294-11e8-99c5-374c34168b1e.png)
-
+<img src="https://user-images.githubusercontent.com/28767885/46435435-9ecab600-c756-11e8-8e82-1cd295e4f7ae.PNG" width="45%"></img> <img src="https://user-images.githubusercontent.com/28767885/46435436-9ecab600-c756-11e8-88de-a570c0a794ea.PNG" width="45%"></img> <img src="https://user-images.githubusercontent.com/28767885/46435437-9ecab600-c756-11e8-990b-443cd81ae1f3.PNG" width="45%"></img> <img src="https://user-images.githubusercontent.com/28767885/46435440-9f634c80-c756-11e8-81a0-cb47e1ab08b6.PNG" width="45%"></img> 
