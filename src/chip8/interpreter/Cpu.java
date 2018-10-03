@@ -8,6 +8,8 @@ package chip8.interpreter;
 import chip8.gui.Keyboard;
 import java.awt.Toolkit;
 import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -130,15 +132,12 @@ public class Cpu {
                 drawFlag = true;
                 pc += 2;
                 break;
-
             case 0xE:
                 decodeAndExecute0xE();
                 break;
-
             case 0xF:
                 decodeAndExecute0xF();
                 break;
-
             default:
                 warnUnsupportedOpcode();
         }
@@ -149,16 +148,15 @@ public class Cpu {
             case 0x00E0:
                 //00E0 	Display 	disp_clear() 	Clears the screen. 
                 Arrays.fill(gfx, 0);
-                pc += 2;
                 break;
             case 0x00EE:
                 //00EE 	Flow 	return; 	Returns from a subroutine. 
                 pc = stack[--stackPointer];
-                pc += 2;
                 break;
             default: //0nnn This instruction is only used on the old computers on which Chip-8 was originally implemented. It is ignored by modern interpreters.
                 warnUnsupportedOpcode();
         }
+        pc += 2;
     }
 
     private void decodeAndExecute0x8() {
@@ -217,15 +215,14 @@ public class Cpu {
                 if (keyboard.getKey() == V[x()]) {
                     pc += 2;
                 }
-                pc += 2;
             case 0xE0A1:
                 //EXA1 	KeyOp 	if(key()!=Vx) 	Skips the next instruction if the key stored in VX isn't pressed.
                 if (keyboard.getKey() != V[x()]) {
                     pc += 2;
                 }
-                pc += 2;
                 break;
         }
+        pc += 2;
     }
 
     private void decodeAndExecute0xF() {
@@ -233,38 +230,36 @@ public class Cpu {
             case 0xF007:
                 //FX07 	Timer 	Vx = get_delay() 	Sets VX to the value of the delay timer. 
                 V[x()] = delayTimer;
-                pc += 2;
                 break;
             case 0xF00A:
                 //FX0A 	KeyOp 	Vx = get_key() 	A key press is awaited, and then stored in VX. (Blocking Operation. All instruction halted until next key event) 
                 //todo revisit this seems pretty broken...
                 // TIC TAC TOE DOSNT WORK AND AWAITS HERE FOREVER TODO FIX
                 while (keyboard.getKey() == -1) {
-                    System.out.print("w");
+                    try {
+                        Thread.sleep(300);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(Cpu.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
                 System.err.println("OUT !!!!!");
                 V[x()] = keyboard.getKey();
-                pc += 2;
                 break;
             case 0xF015:
                 //FX15 	Timer 	delay_timer(Vx) 	Sets the delay timer to VX. 
                 delayTimer = V[x()];
-                pc += 2;
                 break;
             case 0xF018:
                 //FX18 	Sound 	sound_timer(Vx) 	Sets the sound timer to VX. 
                 soundTimer = V[x()];
-                pc += 2;
                 break;
             case 0xF01E:
                 //FX1E 	MEM 	I +=Vx 	Adds VX to I.
                 I += V[x()];
-                pc += 2;
                 break;
             case 0xF029:
                 //FX29 	MEM 	I=sprite_addr[Vx] 	Sets I to the location of the sprite for the character in VX. Characters 0-F (in hexadecimal) are represented by a 4x5 font. 
                 I = V[x()] * 5; //// TODO thats probably wrong
-                pc += 2;
                 break;
             case 0xF033:
                 //FX33 	BCD 	set_BCD(Vx);    *(I+0)=BCD(3);  *(I+1)=BCD(2);  *(I+2)=BCD(1);
@@ -272,31 +267,27 @@ public class Cpu {
                 memory[I] = V[x()] / 100;
                 memory[I + 1] = (V[x()] / 10) % 10;
                 memory[I + 2] = V[x()] % 10;
-                System.err.println("DEBUG BCD 33 " + memory[I] + " " + memory[I + 1] + " " + memory[I + 2] + " vx " + V[x()]);
-                pc += 2;
+                //System.err.println("DEBUG BCD 33 " + memory[I] + " " + memory[I + 1] + " " + memory[I + 2] + " vx " + V[x()]);
                 break;
             case 0xF055:
                 //FX55 	MEM 	reg_dump(Vx,&I) 	Stores V0 to VX (including VX) in memory starting at address I. The offset from I is increased by 1 for each value written, but I itself is left unmodified. 
-                System.err.println("DEBUG 55 dump ");
                 for (int i = 0; i <= x(); i++) {
                     memory[I + i] = V[0 + i];
-                    System.out.println("I+i " + I + i + "mem:" + memory[I + i] + " i " + i);
+                    //System.out.println("DEBUG 55 I+i " + I + i + "mem:" + memory[I + i] + " i " + i);
 
                 }
-                pc += 2;
                 break;
             case 0xF065:
                 //FX65 	MEM 	reg_load(Vx,&I) 	Fills V0 to VX (including VX) with values from memory starting at address I. The offset from I is increased by 1 for each value written, but I itself is left unmodified. 
-                System.err.println("DEBUG 65 load ");
                 for (int i = 0; i <= x(); i++) {
                     V[0 + i] = memory[I + i];
-                    System.out.println("I+i " + I + i + "mem:" + memory[I + i] + " i " + i + "vx: " + V[x()] + " x: " + x());
+                    //System.out.println("DEBUG 65 I+i " + I + i + "mem:" + memory[I + i] + " i " + i + "vx: " + V[x()] + " x: " + x());
                 }
-                pc += 2;
                 break;
             default:
                 warnUnsupportedOpcode();
         }
+        pc += 2;
     }
 
     public void updateTimers() {
