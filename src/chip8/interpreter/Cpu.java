@@ -204,7 +204,6 @@ public class Cpu {
     private void decodeAndExecute0xF() {
         switch (opcode & 0xF0FF) {
             case 0xF007: //FX07 Timer  Vx = get_delay()  Sets VX to the value of the delay timer. 
-
                 V[x()] = delayTimer;
                 break;
             case 0xF00A: //FX0A KeyOp  Vx = get_key()  A key press is awaited, and then stored in VX. (Blocking Operation. All instruction halted until next key event)
@@ -229,19 +228,18 @@ public class Cpu {
                 memory[I] = V[x()] / 100;
                 memory[I + 1] = (V[x()] / 10) % 10;
                 memory[I + 2] = V[x()] % 10;
-                System.err.println("DEBUG BCD 33 " + memory[I] + " " + memory[I + 1] + " " + memory[I + 2] + " vx " + V[x()]);
+                //System.err.println("DEBUG BCD 33 " + memory[I] + " " + memory[I + 1] + " " + memory[I + 2] + " vx " + V[x()]);
                 break;
             case 0xF055: //FX55 	MEM 	reg_dump(Vx,&I) 	Stores V0 to VX (including VX) in memory starting at address I. The offset from I is increased by 1 for each value written, but I itself is left unmodified. 
                 for (int i = 0; i <= x(); i++) {
                     memory[I + i] = V[0 + i];
-                    System.err.println("DEBUG 55 I+i " + I + i + "mem:" + memory[I + i] + " i " + i);
-
+                    //System.err.println("DEBUG 55 I+i " + I + i + "mem:" + memory[I + i] + " i " + i);
                 }
                 break;
             case 0xF065: //FX65 MEM  reg_load(Vx,&I)  Fills V0 to VX (including VX) with values from memory starting at address I. The offset from I is increased by 1 for each value written, but I itself is left unmodified.
                 for (int i = 0; i <= x(); i++) {
                     V[0 + i] = memory[I + i];
-                    System.err.println("DEBUG 65 I+i " + I + i + "mem:" + memory[I + i] + " i " + i + "vx: " + V[x()] + " x: " + x());
+                    //System.err.println("DEBUG 65 I+i " + I + i + "mem:" + memory[I + i] + " i " + i + "vx: " + V[x()] + " x: " + x());
                 }
                 break;
             default:
