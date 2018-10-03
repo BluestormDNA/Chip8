@@ -112,8 +112,7 @@ public class Cpu {
                 break;
             case 0xC:
                 //CXNN 	Rand 	Vx=rand()&NN 	Sets VX to the result of a bitwise and operation on a random number (Typically: 0 to 255) and NN. 
-                V[x()] = (int) (Math.random() * 255) & nn(); //Todo check this...
-                //System.out.println(V[x()] + "<--------------------------------RANDOM 0 255??------------------------------------");
+                V[x()] = (int) (Math.random() * 256) & nn();
                 pc += 2;
                 break;
             case 0xD:
