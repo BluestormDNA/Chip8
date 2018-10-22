@@ -10,7 +10,7 @@ What has been implemented:
 * Keyboard input
 * CPU stack, stackpointer, registers and a all the cpu opcodes for fetch decode and execution.
 * Passes test rom
-* At the moment almost all games boot but theres an array oob ex when drawing pending to be fixed
+* At the moment almost all games boot
 
 
 Todo List:
